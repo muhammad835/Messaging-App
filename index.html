@@ -1,1 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Friends Chat</title>
+  <style>
+    body { font-family: Arial; background:#eef; text-align:center; }
+    #chat { background:white; height:300px; width:80%; margin:auto; overflow:auto; padding:10px; }
+    input, button { padding:10px; margin:5px; }
+  </style>
+</head>
+<body>
+
+<h2>Friends Chat</h2>
+
+<div id="chat"></div>
+
+<input id="name" placeholder="Your name"><br>
+<input id="message" placeholder="Type message">
+<button onclick="send()">Send</button>
+
+<script>
+  function send() {
+    const chat = document.getElementById("chat");
+    const name = document.getElementById("name").value;
+    const msg = document.getElementById("message").value;
+    if(name && msg){
+      chat.innerHTML += "<p><b>" + name + ":</b> " + msg + "</p>";
+      document.getElementById("message").value = "";
+    }
+  }
+</script>
+
+</body>
+</html>
 
