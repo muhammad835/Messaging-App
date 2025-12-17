@@ -3,33 +3,113 @@
 <head>
   <title>Friends Chat</title>
   <style>
-    body { font-family: Arial; background:#eef; text-align:center; }
-    #chat { background:white; height:300px; width:80%; margin:auto; overflow:auto; padding:10px; }
-    input, button { padding:10px; margin:5px; }
+    body {
+      font-family: Arial;
+      background: #eef;
+      text-align: center;
+    }
+    #chat {
+      background: white;
+      height: 300px;
+      width: 80%;
+      margin: auto;
+      overflow-y: auto;
+      padding: 10px;
+      border-radius: 10px;
+    }
+    input, button {
+      padding: 10px;
+      margin: 5px;
+      width: 70%;
+      max-width: 300px;
+    }
+    button {
+      width: 150px;
+      cursor: pointer;
+    }
   </style>
 </head>
+
 <body>
 
 <h2>Friends Chat</h2>
 
 <div id="chat"></div>
 
-<input id="name" placeholder="Your name"><br>
+<br>
+
+<input id="room" placeholder="Room code (same for friends)">
+<br>
+<input id="name" placeholder="Your name">
+<br>
 <input id="message" placeholder="Type message">
+<br>
 <button onclick="send()">Send</button>
 
-<script>
-  function send() {
-    const chat = document.getElementById("chat");
-    const name = document.getElementById("name").value;
-    const msg = document.getElementById("message").value;
-    if(name && msg){
-      chat.innerHTML += "<p><b>" + name + ":</b> " + msg + "</p>";
-      document.getElementById("message").value = "";
-    }
+<!-- FIREBASE CHAT SCRIPT -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+  import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-database.js";
+
+  // 🔴 REPLACE THIS WITH YOUR OWN FIREBASE CONFIG
+  const firebaseConfig = {
+   apiKey: "AIzaSyDOib7bKsZcZnz7yOMs49gnFtMnNJmylB0",
+  authDomain: "friends-chat-d3ce8.firebaseapp.com",
+  projectId: "friends-chat-d3ce8",
+  storageBucket: "friends-chat-d3ce8.firebasestorage.app",
+  messagingSenderId: "1096324220330",
+  appId: "1:1096324220330:web:11c3947e3934ff5cd9d7d3",
+  measurementId: "G-5DT5NLQDL1"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  const chatBox = document.getElementById("chat");
+
+  function roomRef() {
+    const room = document.getElementById("room").value.trim();
+    return ref(db, "rooms/" + room);
   }
+
+  window.send = function () {
+    const room = document.getElementById("room").value.trim();
+    const name = document.getElementById("name").value.trim();
+    const message = document.getElementById("message").value.trim();
+
+    if (!room || !name || !message) {
+      alert("Fill room, name, and message!");
+      return;
+    }
+
+    push(roomRef(), {
+      name: name,
+      text: message
+    });
+
+    document.getElementById("message").value = "";
+  };
+
+  let listening = false;
+
+  document.getElementById("room").addEventListener("change", () => {
+    chatBox.innerHTML = "";
+    if (listening) return;
+    listening = true;
+
+    onChildAdded(roomRef(), (data) => {
+      const msg = data.val();
+      const p = document.createElement("p");
+      p.innerHTML = "<b>" + msg.name + ":</b> " + msg.text;
+      chatBox.appendChild(p);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    });
+  });
 </script>
+
+<p style="font-size:12px; opacity:0.7;">
+Use the SAME room code to chat with friends.
+</p>
 
 </body>
 </html>
-
